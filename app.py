@@ -228,7 +228,7 @@ if menu == "Dashboard":
                 title="Distribusi Kondisi Guru"
             )
             fig_kondisi.update_layout(template="plotly_white")
-            st.plotly_chart(fig_kondisi, use_container_width=True)
+            st.plotly_chart(fig_kondisi, use_container_width=True, key="dash_pie_kondisi")
 
         with col2:
             guru_tahun = df.groupby("Tahun")["Jumlah_Guru"].sum().reset_index()
@@ -241,7 +241,7 @@ if menu == "Dashboard":
                 title="Perkembangan Jumlah Guru"
             )
             fig_guru.update_layout(template="plotly_white")
-            st.plotly_chart(fig_guru, use_container_width=True)
+            st.plotly_chart(fig_guru, use_container_width=True, key="dash_line_guru")
 
         col1, col2 = st.columns(2)
 
@@ -255,7 +255,7 @@ if menu == "Dashboard":
                 title="Jumlah Siswa per Tahun"
             )
             fig_siswa.update_layout(template="plotly_white")
-            st.plotly_chart(fig_siswa, use_container_width=True)
+            st.plotly_chart(fig_siswa, use_container_width=True, key="dash_bar_siswa_tahun")
 
         with col2:
             sekolah_tahun = df.groupby("Tahun")["Jumlah_Sekolah"].sum().reset_index()
@@ -267,7 +267,7 @@ if menu == "Dashboard":
                 title="Jumlah Sekolah per Tahun"
             )
             fig_sekolah.update_layout(template="plotly_white")
-            st.plotly_chart(fig_sekolah, use_container_width=True)
+            st.plotly_chart(fig_sekolah, use_container_width=True, key="dash_bar_sekolah_tahun")
 
         st.markdown("---")
 
@@ -295,7 +295,7 @@ if menu == "Dashboard":
             title=f"Top 10 Kekurangan Guru Tahun {tahun_terbaru}"
         )
         fig_kurang.update_layout(template="plotly_white", height=500)
-        st.plotly_chart(fig_kurang, use_container_width=True)
+        st.plotly_chart(fig_kurang, use_container_width=True, key="dash_bar_top_kurang")
 
         st.dataframe(
             top_kurang[["Tahun", "Kota", "Jumlah_Guru", "Guru_Ideal", "Gap"]],
@@ -321,7 +321,7 @@ if menu == "Dashboard":
             title=f"Top 10 Kelebihan Guru Tahun {tahun_terbaru}"
         )
         fig_lebih.update_layout(template="plotly_white", height=500)
-        st.plotly_chart(fig_lebih, use_container_width=True)
+        st.plotly_chart(fig_lebih, use_container_width=True, key="dash_bar_top_lebih")
 
         st.dataframe(
             top_lebih[["Kota", "Jumlah_Guru", "Guru_Ideal", "Gap"]],
@@ -341,7 +341,7 @@ if menu == "Dashboard":
             color="Tahun", size="Jumlah_Sekolah", hover_name="Kota",
             title="Jumlah Siswa vs Jumlah Guru"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="eksplor_scatter_siswa_guru")
 
         st.subheader("Hubungan Jumlah Sekolah dan Jumlah Guru")
         fig = px.scatter(
@@ -349,7 +349,7 @@ if menu == "Dashboard":
             color="Tahun", hover_name="Kota",
             title="Jumlah Sekolah vs Jumlah Guru"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="eksplor_scatter_sekolah_guru")
 
         col1, col2 = st.columns(2)
 
@@ -364,7 +364,7 @@ if menu == "Dashboard":
                 top_guru, x="Jumlah_Guru", y="Kota", orientation="h",
                 color="Jumlah_Guru", title=f"Top 10 Guru Terbanyak {tahun_terbaru}"
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, key="eksplor_bar_top_guru")
 
         with col2:
             st.subheader(f"Top 10 Kota — Siswa Terbanyak ({tahun_terbaru})")
@@ -377,14 +377,14 @@ if menu == "Dashboard":
                 top_siswa, x="Jumlah_Siswa", y="Kota", orientation="h",
                 color="Jumlah_Siswa", title=f"Top 10 Siswa Terbanyak {tahun_terbaru}"
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, key="eksplor_bar_top_siswa")
 
         st.subheader("Distribusi Rasio Siswa-Guru")
         fig = px.histogram(
             df, x="Rasio_Siswa_Guru", nbins=20,
             title="Distribusi Rasio Siswa-Guru"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="eksplor_hist_rasio")
 
         st.subheader(f"Top 10 Rasio Siswa-Guru Tertinggi ({tahun_terbaru})")
         top_rasio = (
@@ -493,7 +493,7 @@ elif menu == "Pemodelan Regresi":
             color="Tahun", hover_name="Kota",
             title="Perbandingan Guru Aktual dan Prediksi"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="model_scatter_aktual_prediksi")
 
         st.subheader("Distribusi Error Prediksi")
 
@@ -504,7 +504,7 @@ elif menu == "Pemodelan Regresi":
             df_error, x="Error", nbins=20,
             title="Distribusi Error Prediksi"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="model_hist_error")
 
         st.markdown("---")
 
@@ -516,7 +516,7 @@ elif menu == "Pemodelan Regresi":
             corr, text_auto=True, aspect="auto",
             title="Matriks Korelasi"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="model_imshow_korelasi")
 
         st.markdown("---")
 
@@ -570,7 +570,7 @@ elif menu == "Pemodelan Regresi":
             df_eval, x="Error", nbins=20,
             title="Distribusi Error Prediksi"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="eval_hist_error")
 
         st.markdown("---")
 
@@ -720,7 +720,7 @@ elif menu == "Simulasi Prediksi":
                 gauge={'axis': {'range': [0, prediksi * 1.5]}}
             )
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="sim_gauge_prediksi")
 
         chart_df = pd.DataFrame({
             "Kategori": ["Prediksi Guru", "Guru Ideal"],
@@ -731,7 +731,7 @@ elif menu == "Simulasi Prediksi":
             chart_df, x="Kategori", y="Jumlah", color="Kategori",
             title="Perbandingan Guru Prediksi dan Guru Ideal"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="sim_bar_perbandingan")
 
         st.markdown("---")
 
@@ -808,12 +808,12 @@ elif menu == "Analisis Gap & Klasifikasi":
             color_discrete_sequence=["#ef4444"]
         )
         fig_gap.update_layout(title="Distribusi Gap Guru")
-        st.plotly_chart(fig_gap, use_container_width=True)
+        st.plotly_chart(fig_gap, use_container_width=True, key="gap_hist_distribusi")
 
         st.subheader("Sebaran Gap")
 
         fig_box = px.box(df, y="Gap", points="outliers")
-        st.plotly_chart(fig_box, use_container_width=True)
+        st.plotly_chart(fig_box, use_container_width=True, key="gap_box_sebaran")
 
         st.markdown("---")
 
@@ -832,7 +832,7 @@ elif menu == "Analisis Gap & Klasifikasi":
             top_kurang, x="Gap", y="Kota", orientation="h",
             color="Gap", text="Gap", title="Top 10 Kekurangan Guru"
         )
-        st.plotly_chart(fig_kurang, use_container_width=True)
+        st.plotly_chart(fig_kurang, use_container_width=True, key="gap_bar_top_kurang")
 
         st.subheader(f"🟢 Top 10 Kelebihan Guru Tahun {tahun_terbaru}")
 
@@ -846,7 +846,7 @@ elif menu == "Analisis Gap & Klasifikasi":
             top_lebih, x="Gap", y="Kota", orientation="h",
             color="Gap", text="Gap", title="Top 10 Kelebihan Guru"
         )
-        st.plotly_chart(fig_lebih, use_container_width=True)
+        st.plotly_chart(fig_lebih, use_container_width=True, key="gap_bar_top_lebih")
 
         st.markdown("---")
 
@@ -935,7 +935,7 @@ elif menu == "Analisis Gap & Klasifikasi":
                 chart_df, x="Kategori", y="Jumlah", color="Kategori",
                 title="Perbandingan Guru Aktual dan Guru Ideal"
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, key="monitor_bar_perbandingan")
 
             st.subheader("Detail Data")
             st.dataframe(data_monitor, use_container_width=True)
@@ -990,13 +990,13 @@ elif menu == "Analisis Gap & Klasifikasi":
             kondisi_count, values="Jumlah", names="Kondisi",
             hole=0.4, title="Distribusi Kondisi Guru"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="klasifikasi_pie_kondisi")
 
         fig_bar = px.bar(
             kondisi_count, x="Kondisi", y="Jumlah", color="Kondisi",
             title="Jumlah Data pada Setiap Kondisi"
         )
-        st.plotly_chart(fig_bar, use_container_width=True)
+        st.plotly_chart(fig_bar, use_container_width=True, key="klasifikasi_bar_jumlah")
 
         st.subheader("Detail Klasifikasi")
 
@@ -1072,7 +1072,7 @@ elif menu == "Rekomendasi Distribusi":
         prioritas_count, x="Prioritas", y="Jumlah", color="Prioritas",
         title="Distribusi Prioritas Distribusi Guru"
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="rekom_bar_distribusi_prioritas")
 
     st.subheader("Top 10 Prioritas Distribusi Guru")
 
@@ -1083,7 +1083,7 @@ elif menu == "Rekomendasi Distribusi":
         color="Prioritas", text="Gap",
         title="Top 10 Prioritas Distribusi Guru"
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="rekom_bar_top10")
 
     st.dataframe(
         top10[["Kota", "Jumlah_Guru", "Guru_Ideal", "Gap", "Prioritas"]],
