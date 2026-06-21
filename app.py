@@ -23,11 +23,11 @@ st.markdown("""
 <style>
 
 .main {
-    background-color: #c9040b;
+    background-color: #f8fafc;
 }
 
 [data-testid="stMetric"] {
-    background-color: #c9040b;
+    background-color: #ffffff;
     padding: 20px;
     border-radius: 15px;
     border-left: 6px solid #2563eb;
@@ -552,12 +552,10 @@ elif menu == "Pemodelan Regresi":
             st.metric("Adj R²", "0.927")
 
         with col3:
-            # TODO: ganti dengan nilai MAE aktual hasil perhitungan
-            st.metric("MAE", "Isi Hasil")
+            st.metric("MAE", "182.93")
 
         with col4:
-            # TODO: ganti dengan nilai RMSE aktual hasil perhitungan
-            st.metric("RMSE", "Isi Hasil")
+            st.metric("RMSE", "335.98")
 
         st.markdown("---")
 
@@ -576,41 +574,59 @@ elif menu == "Pemodelan Regresi":
 
         st.subheader("Uji Normalitas")
 
-        # TODO: ganti baris berikut dengan hasil uji Shapiro-Wilk aktual
         normalitas = pd.DataFrame({
             "Metode": ["Shapiro-Wilk"],
-            "Statistik": ["Isi Hasil"],
-            "P-Value": ["Isi Hasil"],
-            "Kesimpulan": ["Isi Hasil"]
+            "Statistik": ["0.6740"],
+            "P-Value": ["3.75e-14"],
+            "Kesimpulan": ["Residual tidak berdistribusi normal (p < 0.05)"]
         })
         st.dataframe(normalitas, use_container_width=True)
 
+        st.caption(
+            "Catatan: p-value jauh lebih kecil dari α = 0,05 sehingga H0 "
+            "(residual berdistribusi normal) ditolak. Hal ini menjadi "
+            "salah satu keterbatasan model, meskipun dengan jumlah "
+            "observasi yang relatif besar (n = 108), estimasi koefisien "
+            "tetap dapat dipertimbangkan cukup stabil."
+        )
+
         st.subheader("Uji Multikolinearitas")
 
-        # TODO: ganti baris berikut dengan nilai VIF aktual per variabel
         vif_df = pd.DataFrame({
             "Variabel": ["Jumlah_Siswa", "Jumlah_Sekolah"],
-            "VIF": ["Isi Hasil", "Isi Hasil"]
+            "VIF": ["9.62", "9.62"]
         })
         st.dataframe(vif_df, use_container_width=True)
 
+        st.caption(
+            "Catatan: nilai VIF berada di bawah ambang batas 10, namun "
+            "cukup mendekati batas tersebut. Hal ini mengindikasikan "
+            "korelasi yang cukup tinggi antara jumlah siswa dan jumlah "
+            "sekolah, yang secara teori memang saling berkaitan karena "
+            "wilayah dengan lebih banyak sekolah cenderung memiliki "
+            "lebih banyak siswa. Multikolinearitas masih dalam batas "
+            "yang dapat ditoleransi."
+        )
+
         st.subheader("Uji Heteroskedastisitas")
 
-        # TODO: ganti baris berikut dengan hasil uji Breusch-Pagan aktual
         bp_df = pd.DataFrame({
-            "Metode": ["Breusch-Pagan"],
-            "P-Value": ["Isi Hasil"],
-            "Kesimpulan": ["Isi Hasil"]
+            "Metode": ["Breusch-Pagan (LM-Test)", "Breusch-Pagan (F-Test)"],
+            "Statistik": ["4.3109", "2.1827"],
+            "P-Value": ["0.1159", "0.1178"],
+            "Kesimpulan": [
+                "Tidak terdapat heteroskedastisitas (p > 0.05)",
+                "Tidak terdapat heteroskedastisitas (p > 0.05)"
+            ]
         })
         st.dataframe(bp_df, use_container_width=True)
 
         st.subheader("Uji Autokorelasi")
 
-        # TODO: ganti baris berikut dengan nilai Durbin-Watson aktual
         dw_df = pd.DataFrame({
             "Metode": ["Durbin-Watson"],
-            "Nilai": ["Isi Hasil"],
-            "Kesimpulan": ["Isi Hasil"]
+            "Nilai": ["1.6637"],
+            "Kesimpulan": ["Tidak terdapat autokorelasi (nilai mendekati 2)"]
         })
         st.dataframe(dw_df, use_container_width=True)
 
@@ -619,16 +635,30 @@ elif menu == "Pemodelan Regresi":
         st.success("""
         Ringkasan Evaluasi Model
 
-        • Model memiliki kemampuan prediksi yang baik.
+        • Model menjelaskan 92,9% variasi jumlah guru (R² = 0,929),
+          dengan rata-rata kesalahan prediksi (MAE) sekitar 183 guru
+          dan RMSE sekitar 336 guru.
 
         • Variabel jumlah siswa dan jumlah sekolah
           berpengaruh signifikan terhadap jumlah guru.
 
-        • Model dapat digunakan untuk mendukung
-          analisis kebutuhan guru MI.
+        • Uji heteroskedastisitas (Breusch-Pagan, p = 0,116) dan uji
+          autokorelasi (Durbin-Watson = 1,66) menunjukkan kedua asumsi
+          tersebut terpenuhi: varians residual homogen dan tidak
+          terdapat autokorelasi antar residual.
 
-        • Hasil evaluasi menunjukkan model layak
-          digunakan pada penelitian ini.
+        • Uji multikolinearitas (VIF = 9,62 untuk kedua variabel)
+          menunjukkan korelasi antar variabel independen masih berada
+          di bawah ambang batas, meskipun cukup mendekati batas
+          tersebut akibat keterkaitan alami antara jumlah siswa dan
+          jumlah sekolah.
+
+        • Residual model tidak berdistribusi normal (uji Shapiro-Wilk,
+          p < 0,05), sehingga interpretasi signifikansi uji t dan uji F
+          perlu dilakukan dengan kehati-hatian. Hal ini dicatat sebagai
+          salah satu keterbatasan penelitian, meskipun dengan jumlah
+          observasi yang relatif besar (n = 108) estimasi koefisien
+          tetap dapat dipertimbangkan cukup stabil.
         """)
 
 
