@@ -75,6 +75,25 @@ def hitung_guru_ideal(jumlah_siswa):
     return jumlah_siswa / RASIO_IDEAL
 
 
+def klasifikasi_kondisi(gap):
+    """
+    Klasifikasi kondisi guru berdasarkan besaran gap.
+
+    Gap > 10            -> Kekurangan Guru
+    Gap = 0              -> Ideal
+    Gap < -10            -> Kelebihan Guru
+    -10 <= Gap <= 10     -> Mendekati Ideal (selain Gap = 0)
+    """
+    if gap == 0:
+        return "Ideal"
+    elif gap > 10:
+        return "Kekurangan Guru"
+    elif gap < -10:
+        return "Kelebihan Guru"
+    else:
+        return "Mendekati Ideal"
+
+
 def klasifikasi_prioritas(gap):
     """Klasifikasi prioritas distribusi berdasarkan besaran gap."""
     if gap >= 2000:
@@ -100,6 +119,11 @@ def load_data():
 
 
 df = load_data()
+
+# Hitung ulang kolom "Kondisi" berdasarkan aturan klasifikasi terbaru
+# (Kekurangan Guru / Ideal / Mendekati Ideal / Kelebihan Guru),
+# menggantikan nilai "Kondisi" bawaan dari file Excel.
+df["Kondisi"] = df["Gap"].apply(klasifikasi_kondisi)
 
 # ==================================================
 # SIDEBAR — MENU (6 menu hasil penggabungan)
@@ -279,7 +303,7 @@ if menu == "Dashboard":
         data_terbaru = df[df["Tahun"] == tahun_terbaru]
 
         top_kurang = (
-            data_terbaru[data_terbaru["Gap"] > 0]
+            data_terbaru[data_terbaru["Gap"] > 10]
             .sort_values(by="Gap", ascending=False)
             .head(10)
         )
@@ -305,7 +329,7 @@ if menu == "Dashboard":
         st.subheader(f"🟢 Top 10 Kelebihan Guru Tahun {tahun_terbaru}")
 
         top_lebih = (
-            data_terbaru[data_terbaru["Gap"] < 0]
+            data_terbaru[data_terbaru["Gap"] < -10]
             .sort_values(by="Gap")
             .head(10)
         )
@@ -724,7 +748,7 @@ elif menu == "Simulasi Prediksi":
         prediksi = hitung_prediksi_guru(jumlah_siswa, jumlah_sekolah)
         guru_ideal = hitung_guru_ideal(jumlah_siswa)
         gap = guru_ideal - prediksi
-        kondisi = "Kekurangan Guru" if gap > 0 else "Kelebihan Guru"
+        kondisi = klasifikasi_kondisi(gap)
 
         st.success(f"Prediksi Jumlah Guru: {round(prediksi)} Guru")
 
@@ -765,16 +789,32 @@ elif menu == "Simulasi Prediksi":
 
         st.markdown("---")
 
-        if gap > 0:
+        if kondisi == "Kekurangan Guru":
             st.warning(
                 f"Berdasarkan simulasi, dengan {jumlah_siswa:,} siswa dan "
-                f"{jumlah_sekolah:,} sekolah, masih terdapat kekurangan "
-                f"sekitar {round(gap)} guru."
+                f"{jumlah_sekolah:,} sekolah, kondisi tergolong "
+                f"**{kondisi}** — masih terdapat kekurangan sekitar "
+                f"{round(gap)} guru. Penambahan guru mendesak diprioritaskan."
             )
-        else:
+        elif kondisi == "Kelebihan Guru":
+            st.info(
+                f"Berdasarkan simulasi, dengan {jumlah_siswa:,} siswa dan "
+                f"{jumlah_sekolah:,} sekolah, kondisi tergolong "
+                f"**{kondisi}** — pertimbangkan redistribusi guru ke "
+                f"wilayah yang kekurangan."
+            )
+        elif kondisi == "Ideal":
             st.success(
                 f"Berdasarkan simulasi, dengan {jumlah_siswa:,} siswa dan "
-                f"{jumlah_sekolah:,} sekolah, kebutuhan guru telah terpenuhi."
+                f"{jumlah_sekolah:,} sekolah, distribusi guru sudah "
+                f"**Ideal** — pertahankan kondisi ini."
+            )
+        else:  # Mendekati Ideal
+            st.success(
+                f"Berdasarkan simulasi, dengan {jumlah_siswa:,} siswa dan "
+                f"{jumlah_sekolah:,} sekolah, kondisi tergolong "
+                f"**Mendekati Ideal** — masih terdapat selisih kecil "
+                f"terhadap kondisi ideal."
             )
 
         hasil = pd.DataFrame({
@@ -853,7 +893,7 @@ elif menu == "Analisis Gap & Klasifikasi":
         st.subheader(f"🔴 Top 10 Kekurangan Guru Tahun {tahun_terbaru}")
 
         top_kurang = (
-            data_terbaru[data_terbaru["Gap"] > 0]
+            data_terbaru[data_terbaru["Gap"] > 10]
             .sort_values(by="Gap", ascending=False)
             .head(10)
         )
@@ -867,7 +907,7 @@ elif menu == "Analisis Gap & Klasifikasi":
         st.subheader(f"🟢 Top 10 Kelebihan Guru Tahun {tahun_terbaru}")
 
         top_lebih = (
-            data_terbaru[data_terbaru["Gap"] < 0]
+            data_terbaru[data_terbaru["Gap"] < -10]
             .sort_values(by="Gap")
             .head(10)
         )
@@ -951,8 +991,12 @@ elif menu == "Analisis Gap & Klasifikasi":
 
             if kondisi == "Kekurangan Guru":
                 st.error(f"Status: {kondisi}")
-            else:
+            elif kondisi == "Kelebihan Guru":
+                st.warning(f"Status: {kondisi}")
+            elif kondisi == "Ideal":
                 st.success(f"Status: {kondisi}")
+            else:  # Mendekati Ideal
+                st.info(f"Status: {kondisi}")
 
             st.subheader("Perbandingan Guru Aktual dan Ideal")
 
@@ -972,15 +1016,26 @@ elif menu == "Analisis Gap & Klasifikasi":
 
             st.markdown("---")
 
-            if data["Gap"] > 0:
+            if kondisi == "Kekurangan Guru":
                 st.warning(
                     f"Kota {kota_pilih} masih mengalami kekurangan sekitar "
-                    f"{round(data['Gap'])} guru."
+                    f"{round(data['Gap'])} guru. Penambahan guru mendesak "
+                    f"diprioritaskan."
                 )
-            else:
+            elif kondisi == "Kelebihan Guru":
+                st.info(
+                    f"Kota {kota_pilih} mengalami kelebihan guru. "
+                    f"Pertimbangkan redistribusi ke wilayah yang kekurangan."
+                )
+            elif kondisi == "Ideal":
                 st.success(
-                    f"Kota {kota_pilih} telah memenuhi kebutuhan guru "
-                    f"berdasarkan hasil analisis."
+                    f"Kota {kota_pilih} sudah dalam kondisi ideal. "
+                    f"Pertahankan kondisi ini."
+                )
+            else:  # Mendekati Ideal
+                st.success(
+                    f"Kota {kota_pilih} mendekati kondisi ideal, dengan "
+                    f"selisih yang relatif kecil terhadap kondisi ideal."
                 )
 
         else:
@@ -997,10 +1052,34 @@ elif menu == "Analisis Gap & Klasifikasi":
         kekurangan atau kelebihan guru.
         """)
 
+        aturan_klasifikasi = pd.DataFrame({
+            "Kondisi Gap": [
+                "Gap > 10",
+                "Gap = 0",
+                "Gap < -10",
+                "-10 ≤ Gap ≤ 10 (selain 0)"
+            ],
+            "Klasifikasi": [
+                "Kekurangan Guru",
+                "Ideal",
+                "Kelebihan Guru",
+                "Mendekati Ideal"
+            ],
+            "Deskripsi": [
+                "Penambahan guru mendesak diprioritaskan",
+                "Distribusi sudah ideal, pertahankan",
+                "Pertimbangkan redistribusi ke wilayah kekurangan",
+                "Masih terdapat selisih terhadap kondisi ideal, namun relatif kecil"
+            ]
+        })
+        st.dataframe(aturan_klasifikasi, use_container_width=True)
+
+        st.markdown("---")
+
         kondisi_count = df["Kondisi"].value_counts().reset_index()
         kondisi_count.columns = ["Kondisi", "Jumlah"]
 
-        col1, col2 = st.columns(2)
+        col1, col2, col3, col4 = st.columns(4)
 
         with col1:
             st.metric(
@@ -1009,6 +1088,18 @@ elif menu == "Analisis Gap & Klasifikasi":
             )
 
         with col2:
+            st.metric(
+                "Mendekati Ideal",
+                int((df["Kondisi"] == "Mendekati Ideal").sum())
+            )
+
+        with col3:
+            st.metric(
+                "Ideal",
+                int((df["Kondisi"] == "Ideal").sum())
+            )
+
+        with col4:
             st.metric(
                 "Kelebihan Guru",
                 int((df["Kondisi"] == "Kelebihan Guru").sum())
