@@ -23,7 +23,7 @@ st.markdown("""
 <style>
 
 .main {
-    background-color: #c9040b;
+    background-color:  #FFFFFF;
 }
 
 [data-testid="stMetric"] {
